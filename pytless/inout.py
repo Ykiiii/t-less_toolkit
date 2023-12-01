@@ -3,8 +3,8 @@
 
 import numpy as np
 import struct
-# import yaml
-import ruamel.yaml as yaml
+import yaml
+# import ruamel.yaml as yaml
 
 def load_info(path):
     with open(path, 'r') as f:
@@ -121,20 +121,20 @@ def load_ply(path):
 
     # Prepare data structures
     model = {}
-    model['pts'] = np.zeros((n_pts, 3), np.float)
+    model['pts'] = np.zeros((n_pts, 3), np.float64)
     if n_faces > 0:
-        model['faces'] = np.zeros((n_faces, face_n_corners), np.float)
+        model['faces'] = np.zeros((n_faces, face_n_corners), np.float64)
 
     pt_props_names = [p[0] for p in pt_props]
     is_normal = False
     if {'nx', 'ny', 'nz'}.issubset(set(pt_props_names)):
         is_normal = True
-        model['normals'] = np.zeros((n_pts, 3), np.float)
+        model['normals'] = np.zeros((n_pts, 3), np.float64)
 
     is_color = False
     if {'red', 'green', 'blue'}.issubset(set(pt_props_names)):
         is_color = True
-        model['colors'] = np.zeros((n_pts, 3), np.float)
+        model['colors'] = np.zeros((n_pts, 3), np.float64)
 
     formats = { # For binary format
         'float': ('f', 4),
