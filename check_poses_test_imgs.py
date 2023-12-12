@@ -13,7 +13,7 @@ import scipy.misc
 import matplotlib.pyplot as plt
 import imageio
 
-scene_ids = [1] # Choose which scene_ids to render. Eg. range(1, 21)
+scene_ids = [20] # Choose which scene_ids to render. Eg. range(1, 21)
 device = 'primesense' # options: 'primesense', 'kinect', 'canon'
 model_type = 'cad' # options: 'cad', 'reconst'
 im_step = 100 # Consider every im_step-th image

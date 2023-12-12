@@ -182,14 +182,15 @@ class _Canvas(app.Canvas):
         yz_flip[1, 1], yz_flip[2, 2] = -1, -1
         self.mat_view = yz_flip.dot(self.mat_view) # OpenCV to OpenGL camera system
         self.mat_view = self.mat_view.T # OpenGL expects column-wise matrix format
-
+        # print(self.mat_view)
         # Projection matrix
+
         self.mat_proj = _compute_calib_proj(K, 0, 0, size[0], size[1], clip_near, clip_far)
 
         # Create buffers
         self.vertex_buffer = gloo.VertexBuffer(vertices)
         self.index_buffer = gloo.IndexBuffer(faces.flatten().astype(np.uint32))
-
+        
         # We manually draw the hidden canvas
         self.update()
 
@@ -272,7 +273,7 @@ class _Canvas(app.Canvas):
 def render(model, im_size, K, R, t, clip_near=100, clip_far=2000,
            surf_color=None, bg_color=(0.0, 0.0, 0.0, 0.0),
            ambient_weight=0.1, mode='rgb+depth'):
-
+    
     # Process input data
     #---------------------------------------------------------------------------
     # Make sure vertices and faces are provided in the model
@@ -298,6 +299,7 @@ def render(model, im_size, K, R, t, clip_near=100, clip_far=2000,
     #---------------------------------------------------------------------------
     render_rgb = mode in ['rgb', 'rgb+depth']
     render_depth = mode in ['depth', 'rgb+depth']
+    
     c = _Canvas(vertices, model['faces'], im_size, K, R, t, clip_near, clip_far,
                 bg_color, ambient_weight, render_rgb, render_depth)
     app.run()

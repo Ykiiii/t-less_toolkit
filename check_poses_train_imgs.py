@@ -7,13 +7,13 @@
 # The visualizations are saved into the folder specified by "output_dir".
 
 from pytless import inout, renderer, misc
-import os
+import os,cv2
 import numpy as np
 import scipy.misc
 import matplotlib.pyplot as plt
 import imageio
 
-obj_ids = [1] # Choose which scene_ids to render. Eg. range(1, 31)
+obj_ids = [5] # Choose which scene_ids to render. Eg. range(1, 31)
 device = 'primesense' # options: 'primesense', 'kinect', 'canon'
 model_type = 'cad' # options: 'cad', 'reconst'
 im_step = 100 # Consider every im_step-th image
@@ -68,13 +68,17 @@ for obj_id in obj_ids:
         # Get intrinsic camera parameters and object pose
         K = im_info['cam_K']
         R = im_gt[0]['cam_R_m2c']
+
         t = im_gt[0]['cam_t_m2c']
+        # print(R)
+        # print(t)
 
         # Visualization #1
         #-----------------------------------------------------------------------
         # Load RGB image
         rgb_path = rgb_path_mask.format(device, '{:02d}'.format(obj_id), '{:04}'.format(im_id), rgb_ext[device])
-        rgb = imageio.imread(rgb_path)
+        # rgb = imageio.imread(rgb_path)
+        rgb = cv2.imread(rgb_path)
 
         # Render RGB image of the object model at the pose associated with
         # the training image into a
@@ -83,7 +87,7 @@ for obj_id in obj_ids:
         im_size = (rgb.shape[1], rgb.shape[0])
         ren_rgb = renderer.render(model, im_size, K, R, t,
                                   surf_color=surf_color, mode='rgb')
-
+        # print("ren_rgb",ren_rgb)
         # vis_rgb = 0.5 * rgb.astype(np.float) + 0.5 * ren_rgb.astype(np.float)
         # vis_rgb = vis_rgb.astype(np.uint8)
 
@@ -91,30 +95,34 @@ for obj_id in obj_ids:
         # vis_rgb = vis_rgb.astype(np.uint8)
 
         # Draw the bounding box of the object
-        vis_rgb = misc.draw_rect(vis_rgb, im_gt[0]['obj_bb'])
+        # vis_rgb = misc.draw_rect(vis_rgb, im_gt[0]['obj_bb'])
 
         # Save the visualization
         vis_rgb[vis_rgb > 255] = 255
         vis_rgb_path = vis_rgb_path_mask.format('{:02d}'.format(obj_id), device, model_type, '{:04}'.format(im_id))
-        imageio.imwrite(vis_rgb_path, vis_rgb.astype(np.uint8))
-
+        # imageio.imwrite(vis_rgb_path, vis_rgb.astype(np.uint8))
+        cv2.imwrite(vis_rgb_path, vis_rgb.astype(np.uint8))
+'''
         # Visualization #2
         #-----------------------------------------------------------------------
         if device != 'canon':
             # Load depth image
             depth_path = depth_path_mask.format(device, '{:02d}'.format(obj_id), '{:04}'.format(im_id), rgb_ext[device])
-            depth = imageio.imread(depth_path)  # Unit: 0.1 mm
-            depth = depth.astype(np.float) * 0.1  # Convert to mm
+            # depth = imageio.imread(depth_path)  # Unit: 0.1 mm
+            depth = cv2.imread(depth_path,cv2.IMREAD_GRAYSCALE)  # Unit: 0.1 mm
+
+            depth = depth.astype(np.float64) * 0.1  # Convert to mm
 
             # Render depth image of the object model at the pose associated
             # with the training image
             im_size = (depth.shape[1], depth.shape[0])
             ren_depth = renderer.render(model, im_size, K, R, t, mode='depth')
+            # print(ren_depth.shape)
 
             # Calculate the depth difference at pixels where both depth maps
             # are valid
             valid_mask = (depth > 0) * (ren_depth > 0)
-            depth_diff = valid_mask * (depth - ren_depth.astype(np.float))
+            depth_diff = valid_mask * (depth - ren_depth.astype(np.float64))
 
             # Save the visualization
             vis_depth_path = vis_depth_path_mask.format('{:02d}'.format(obj_id), device,
@@ -122,5 +130,6 @@ for obj_id in obj_ids:
             plt.matshow(depth_diff)
             plt.title('captured - rendered depth [mm]')
             plt.colorbar()
-            plt.savefig(vis_depth_path, pad=0)
+            plt.savefig(vis_depth_path)
             plt.close()
+'''
